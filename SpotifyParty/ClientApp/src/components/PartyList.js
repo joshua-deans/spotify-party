@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
-export class Home extends Component {
-  static displayName = Home.name;
+export class PartyList extends Component {
+  static displayName = PartyList.name;
 
   constructor(props) {
     super(props);
@@ -9,12 +9,12 @@ export class Home extends Component {
   }
 
   componentDidMount() {
-    this.populateWeatherData();
+    this.populatePartyData();
   }
 
-  static renderForecastsTable(parties) {
+  static renderPartiesTable(parties) {
     return (
-      <table className='table table-striped' aria-labelledby="tabelLabel">
+      <table className='table table-striped' aria-labelledby="tableLabel">
         <thead>
           <tr>
             <th>Date</th>
@@ -38,18 +38,18 @@ export class Home extends Component {
   render() {
     let contents = this.state.loading
       ? <p><em>Loading...</em></p>
-      : Home.renderForecastsTable(this.state.parties);
+      : PartyList.renderPartiesTable(this.state.parties);
 
     return (
       <div>
-        <h1 id="tabelLabel" >Available Parties</h1>
+        <h1 id="tableLabel" >Available Parties</h1>
         <p>This component shows all available parties</p>
         {contents}
       </div>
     );
   }
 
-  async populateWeatherData() {
+  async populatePartyData() {
     const response = await fetch('api/Party');
     const data = await response.json();
     this.setState({ parties: data, loading: false });
