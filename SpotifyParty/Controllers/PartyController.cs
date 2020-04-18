@@ -27,7 +27,7 @@ namespace SpotifyParty.Controllers
         public ActionResult<Party> Get(uint id)
         {
             var db = new SpotifyPartyDBContext();
-            var party = db.Party.Single((p) => p.Id == id);
+            var party = db.Party.Single((p) => p.PartyId == id);
             if (party == null) {
                 return NotFound();
             }
@@ -42,6 +42,7 @@ namespace SpotifyParty.Controllers
             var partySummary = value.GetProperty("summary").GetString();
             var db = new SpotifyPartyDBContext();
             db.Party.Add(new Party { Name = partyName, Summary = partySummary });
+            db.SaveChanges();
         }
 
         // PUT: api/Party/5

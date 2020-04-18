@@ -29,6 +29,7 @@ export class CreateParty extends Component {
             credentials: 'same-origin',
             body: JSON.stringify(this.state)
         }).then(response => {
+            console.log(response);
             this.setState({ partyName: '', partySummary: '' });
         });
         event.preventDefault();

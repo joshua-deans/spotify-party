@@ -22,8 +22,7 @@ namespace SpotifyParty
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Server=tcp:spotify-party.database.windows.net,1433;Database=SpotifyParty;Initial Catalog=spotify-party-database;Persist Security Info=False;User ID=jdeans;Password=BChydro123;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+                optionsBuilder.UseSqlServer(SQLConnectionInfo.getConnectionString());
             }
         }
 
@@ -48,10 +47,7 @@ namespace SpotifyParty
                     .HasMaxLength(30)
                     .IsUnicode(false);
             });
-
-            OnModelCreatingPartial(modelBuilder);
         }
 
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }
