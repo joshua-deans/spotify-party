@@ -1,5 +1,7 @@
 ﻿import React, { Component } from 'react';
+import { Progress } from 'reactstrap';
 import Script from 'react-load-script';
+import './SpotifyPlayerContainer.css';
 
 class SpotifyPlayerContainer extends Component {
     constructor(props) {
@@ -13,7 +15,7 @@ class SpotifyPlayerContainer extends Component {
             const token = this.props.accessToken;
             console.log(this.props);
             const player = new window.Spotify.Player({
-                name: 'Spotify Party #' + this.props.partyId,
+                name: this.props.partyInfo.partyName + ' - Spotify Party',
                 getOAuthToken: cb => { cb(token.access_token); }
             });
 
@@ -24,10 +26,18 @@ class SpotifyPlayerContainer extends Component {
 
             // Playback status updates
             player.addListener('player_state_changed', state => { this.setState({playerState: state}) });
-
             // Ready
             player.addListener('ready', ({ device_id }) => {
                 console.log('Ready with Device ID', device_id);
+                setInterval(() => {
+                    player.getCurrentState().then(state => {
+                        if (!state) {
+                            return;
+                        }
+
+                        this.setState({ playerState: state });
+                    });
+                }, 750);
             });
 
             // Not Ready
@@ -40,20 +50,22 @@ class SpotifyPlayerContainer extends Component {
     }
 
     getCurrentTrackInformation(playerState) {
-        console.log(playerState);
         let currentTrack = playerState.track_window.current_track;
+        let progress = playerState.position / playerState.duration * 100;
         return (
-            <div className="text-center">
-                <div className="h6">Current Track</div>
-                <div>Track Name: {currentTrack.name}</div>
-                <div>Artist(s): {currentTrack.artists[0].name}</div>
-                <div>Album: {currentTrack.album.name}</div>
+            <div className="currentTrackInformation text-center">
+              <img className="SpotifyPlayerContainer-Image img-thumbnail" src={currentTrack.album.images[0].url} />
+              <div className="currentTrackDetails">
+                <div className="font-weight-bold">{currentTrack.name}</div>
+                <div>{currentTrack.artists[0].name}</div>
+                <Progress value={progress} className="SpotifyPlayerContainer-Progress" />
+              </div>
             </div>
-            )
+        )
     }
 
     render() {
-        let playerInfo = (this.state.playerState != null) ? this.getCurrentTrackInformation(this.state.playerState) : <div className="text-center h6">No Music Currently Playing</div> 
+        let playerInfo = (this.state.playerState != null) ? this.getCurrentTrackInformation(this.state.playerState) : <div className="currentTrackInformation h6">No Music Currently Playing</div> 
         return (
             <div>
                 { playerInfo }

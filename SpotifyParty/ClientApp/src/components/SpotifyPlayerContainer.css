@@ -1,0 +1,27 @@
+﻿.currentTrackInformation {
+    color: white;
+    border-radius: 4px;
+    padding: 16px;
+    text-align: center;
+    background-color: #343a40;
+    display: flex;
+}
+
+.SpotifyPlayerContainer-Image {
+    height: 125px;
+    margin: auto;
+}
+
+.currentTrackDetails {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    margin: auto 0;
+    padding: 0 16px;
+    width: 100%;
+}
+
+.SpotifyPlayerContainer-Progress {
+    height: 5px;
+    margin: 10px 0;
+}

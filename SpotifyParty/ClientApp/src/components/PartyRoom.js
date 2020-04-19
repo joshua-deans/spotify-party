@@ -39,9 +39,13 @@ class PartyRoom extends Component {
                 </header>
                 <Row>
                     <Col md="6">
-                        <SpotifyPlayerContainer spotifyCode={this.props.spotifyCode} accessToken={this.props.accessToken} partyId={id} />
+                        <SpotifyPlayerContainer spotifyCode={this.props.spotifyCode} accessToken={this.props.accessToken} partyInfo={this.state} />
                     </Col>
-                    <Col md="6" className="PartyRoomChat">Chat Section</Col>
+                    <Col md="6">
+                        <div className="PartyRoomChat">
+                            Chat Section
+                        </div>
+                    </Col>
                 </Row>
                 
             </div>
