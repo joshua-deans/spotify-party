@@ -3,6 +3,7 @@ import { Collapse, Container, Navbar, NavbarBrand, NavbarToggler, NavItem, NavLi
 import { Link } from 'react-router-dom';
 import './NavMenu.css';
 import { connect } from 'react-redux';
+import { SpotifyAuthUrl } from '../helper/SpotifyAuthHelper.js'
 
 class NavMenu extends Component {
   constructor (props) {
@@ -12,6 +13,8 @@ class NavMenu extends Component {
     this.state = {
       collapsed: true
       };
+      this.getLoggedInLinks = this.getLoggedInLinks.bind(this);
+      this.getLoggedOutLinks = this.getLoggedOutLinks.bind(this);
       this.logOut = this.logOut.bind(this);
     }
 
@@ -19,7 +22,12 @@ class NavMenu extends Component {
         this.props.logOut();
         localStorage.removeItem("spotifyCode");
         localStorage.removeItem("accessToken");
+        window.location.replace('/');
         event.preventDefault();
+    }
+
+    getProfile(event) {
+        console.log(event);
     }
 
   toggleNavbar () {
@@ -28,37 +36,54 @@ class NavMenu extends Component {
     });
   }
 
+  getLoggedInLinks() {
+      return (
+          <ul className="navbar-nav flex-grow">
+              <NavItem>
+                  <NavLink tag={Link} to="/">Home</NavLink>
+              </NavItem>
+              {false &&
+                  <NavItem>
+                      <a className="nav-link" onClick={event => this.getProfile(event)} href="#">Profile</a>
+                  </NavItem>
+              }
+              
+              <NavItem>
+                  <NavLink tag={Link} to="/create-party">Create Party</NavLink>
+              </NavItem>
+              <NavItem>
+                  <a className="nav-link" onClick={event => this.logOut(event)} href="#">Logout</a>
+              </NavItem>
+          </ul>
+      );
+    }
+
+    getLoggedOutLinks() {
+        if (!this.props.isAuthLoaded) {
+            return <ul className="navbar-nav flex-grow"></ul>
+        }
+        return (
+            <ul className="navbar-nav flex-grow">
+                <NavItem>
+                    <NavLink tag={Link} to="/">Home</NavLink>
+                </NavItem>
+                <NavItem>
+                    <a className="nav-link" href={SpotifyAuthUrl}>Login</a>
+                </NavItem>
+            </ul>);
+    }
+
   render() {
-      let client_id = '363694e7bb1d452eb925484471c45fbf';
-      console.log(this.props);
-      const scopes = [
-          "user-read-currently-playing",
-          "user-read-playback-state",
-          "streaming", "user-read-email", "user-read-private"
-      ];
-      let spotifyAuthUrl = `https://accounts.spotify.com/authorize?client_id=${client_id}&redirect_uri=${window.origin}&scope=${scopes.join("%20")}&response_type=code&show_dialog=true`
+    let navbarLinks = (this.props.isLoggedIn) ? this.getLoggedInLinks() : this.getLoggedOutLinks();
     return (
-      <header>
-        <Navbar className="navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3" light>
+      <header className="NavMenu">
+        <Navbar className="navbar-expand-sm navbar-toggleable-sm navbar-dark box-shadow mb-3 NavMenu-navbar" light>
           <Container>
             <NavbarBrand tag={Link} to="/">Spotify Party</NavbarBrand>
             <NavbarToggler onClick={this.toggleNavbar} className="mr-2" />
             <Collapse className="d-sm-inline-flex flex-sm-row-reverse" isOpen={!this.state.collapsed} navbar>
               <ul className="navbar-nav flex-grow">
-                <NavItem>
-                  <NavLink tag={Link} to="/">Home</NavLink>
-                </NavItem>
-                <NavItem>
-                  <NavLink tag={Link} to="/create-party">Create Party</NavLink>
-                </NavItem>
-                {(!this.props.spotifyCode) ?
-                    <NavItem>
-                      <a className="nav-link" href={spotifyAuthUrl}>Login</a>
-                    </NavItem> :
-                    <NavItem>
-                    <a className="nav-link" onClick={event => this.logOut(event)} href="#">Logout</a>
-                    </NavItem>
-                }
+                { navbarLinks }
               </ul>
             </Collapse>
           </Container>
@@ -70,11 +95,15 @@ class NavMenu extends Component {
 
 const mapStateToProps = state => ({
     spotifyCode: state.auth.spotifyCode,
-    accessToken: state.auth.accessToken
+    accessToken: state.auth.accessToken, 
+    isLoggedIn: state.auth.isLoggedIn,
+    isAuthLoaded: state.auth.isAuthLoaded
 });
 
 const mapDispatchToProps = dispatch => ({
-    logOut: () => dispatch({ type: 'LOGOUT_USER'})
+    logOut: () => {
+        dispatch({ type: 'LOGOUT_USER' });
+    }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(NavMenu);

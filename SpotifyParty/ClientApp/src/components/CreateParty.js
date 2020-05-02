@@ -1,9 +1,10 @@
 ﻿import React, { Component } from 'react';
 import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
+import { connect } from 'react-redux';
+import { Redirect } from 'react-router';
+import './CreateParty.css';
 
-export class CreateParty extends Component {
-    static displayName = CreateParty.name;
-
+class CreateParty extends Component {
     constructor(props) {
         super(props);
         this.state = { name: '', summary: '' };
@@ -27,29 +28,48 @@ export class CreateParty extends Component {
                 'Content-Type': 'application/json'
             },
             credentials: 'same-origin',
-            body: JSON.stringify(this.state)
+            body: JSON.stringify({ ...this.state, userId: this.props.user.userId })
         }).then(response => {
-            console.log(response);
+            if (response && response.status === 200) {
+                window.location.href = "/";
+            }
+            this.setState({ partyName: '', partySummary: '' });
+        }).catch(err => {
             this.setState({ partyName: '', partySummary: '' });
         });
         event.preventDefault();
     }
 
     render() {
+        if (!this.props.isLoggedIn && this.props.isAuthLoaded) {
+            return <Redirect to='/' />;
+        } 
         return (
-            <div>
+            <div className="CreateParty-container">
+                <h3 className="text-center">Create A Party</h3>
+            <div className="card CreateParty-card">
                 <Form onSubmit={this.handleSubmit}>
                     <FormGroup>
                         <Label for="name">Party Name</Label>
-                        <Input type="text" name="name" id="name" value={this.state.name} onChange={this.handleChange} />
+                        <input className="form-control" type="text" name="name" id="name" value={this.state.name} onChange={this.handleChange} required />
                     </FormGroup>
                     <FormGroup>
                         <Label for="summary">Party Summary</Label>
-                        <Input type="textarea" name="summary" id="summary" value={this.state.summary} onChange={this.handleChange} />
+                        <input className="form-control" type="textarea" name="summary" id="summary" value={this.state.summary} onChange={this.handleChange} />
                     </FormGroup>
-                    <Button>Submit</Button>
+                   <Button color="primary">Submit</Button>
                 </Form>
+                </div>
             </div>
         );
     }
 }
+
+const mapStateToProps = state => ({
+    isLoggedIn: state.auth.isLoggedIn,
+    isAuthLoaded: state.auth.isAuthLoaded, 
+    user: state.auth.user
+
+});
+
+export default connect(mapStateToProps)(CreateParty);

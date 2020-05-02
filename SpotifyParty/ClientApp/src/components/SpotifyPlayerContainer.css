@@ -2,13 +2,15 @@
     color: white;
     border-radius: 4px;
     padding: 16px;
+    margin: 16px 0;
     text-align: center;
     background-color: #343a40;
     display: flex;
+    min-height: 150px;
 }
 
 .SpotifyPlayerContainer-Image {
-    height: 125px;
+    height: 110px;
     margin: auto;
 }
 
@@ -24,4 +26,24 @@
 .SpotifyPlayerContainer-Progress {
     height: 5px;
     margin: 10px 0;
+}
+
+.playerSpinner {
+    height: 50px;
+    width:50px;
+    color: white;
+}
+
+.Player-playIcon {
+    padding: 16px;
+    margin: auto;
+    border-radius: 4px;
+}
+
+.Player-playIcon:hover {
+    background-color: #232930;
+}
+
+.SpotifyPlayerContainer-Progress > .progress-bar {
+    background-color: #17a2b8;
 }

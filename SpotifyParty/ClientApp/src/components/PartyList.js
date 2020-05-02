@@ -1,10 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Button } from 'reactstrap';
 
 class PartyList extends Component {
-  static displayName = PartyList.name;
-
   constructor(props) {
     super(props);
     this.renderPartiesTable = this.renderPartiesTable.bind(this);
@@ -14,7 +11,7 @@ class PartyList extends Component {
 
   componentDidMount() {
     this.populatePartyData();
-    }
+  }
 
   isLoggedIn() {
       return this.props.accessToken != null && this.props.spotifyCode != null;
@@ -22,41 +19,42 @@ class PartyList extends Component {
 
   renderPartiesTable(parties) {
       let disabledStatus = (!this.isLoggedIn()) ? "disabled" : "";
+      if (parties.length === 0) {
+          return (
+              <div>
+              </div>
+          );
+      }
       return (
-      <table className='table table-striped' aria-labelledby="tableLabel">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Name</th>
-            <th>Summary</th>
-            <th>Room Link</th>
-          </tr>
-        </thead>
+          <div className="card PartyList-card">
+          <table className='table table-dark PartyList-table' aria-labelledby="tableLabel">
         <tbody>
           {parties.map(party =>
-            <tr key={party.partyId}>
-              <td>{party.startTime}</td>
+            <tr className="PartyList-tr" key={party.partyId}>
               <td>{party.name}</td>
-              <td>{party.summary}</td>
+              <td>{"Users: " + party.users.length}</td>
               <td>
-                <a className={"btn btn-primary " + disabledStatus} href={"/party/" + party.partyId} role="button">Chat</a>{' '}
+                <a className={"btn btn-primary btn-sm float-right " + disabledStatus} href={"/party/" + party.partyId} role="button">Join Party</a>{' '}
               </td>
             </tr>
           )}
         </tbody>
-      </table>
+              </table>
+              </div>
     );
   }
 
   render() {
-    let contents = this.state.loading
+    let contents = (this.state.loading)
       ? <p><em>Loading...</em></p>
       : this.renderPartiesTable(this.state.parties);
 
+      let title = (!this.state.loading && this.state.parties.length === 0)
+          ? "No Parties Available" : "Join A Party"
+      title = (this.state.loading) ? "" : title;
     return (
-      <div>
-        <h1 id="tableLabel" >Available Parties</h1>
-        <p>This component shows all available parties</p>
+      <div className="PartyList-container">
+            <h3 className="text-center" id="tableLabel">{title}</h3>
         {contents}
       </div>
     );
@@ -72,7 +70,8 @@ class PartyList extends Component {
 const mapStateToProps = state => ({
     spotifyCode: state.auth.spotifyCode,
     accessToken: state.auth.accessToken, 
-    isLoggedIn: state.auth.isLoggedIn
+    isLoggedIn: state.auth.isLoggedIn,
+    isAuthLoaded: state.auth.isAuthLoaded
 });
 
 export default connect(mapStateToProps)(PartyList);

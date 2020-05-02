@@ -4,3 +4,11 @@
 
     padding: 16px;
 }
+
+.PartyRoomNavButton {
+    outline: none;
+}
+
+.PartyRoom-Tab.active {
+    font-weight:bold;
+}

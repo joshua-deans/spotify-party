@@ -10,8 +10,8 @@ using SpotifyParty;
 namespace SpotifyParty.Migrations
 {
     [DbContext(typeof(SpotifyPartyDBContext))]
-    [Migration("20200414224847_InitialCreate3")]
-    partial class InitialCreate3
+    [Migration("20200429013422_4-28-Migration")]
+    partial class _428Migration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -30,9 +30,12 @@ namespace SpotifyParty.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("varchar(30)")
-                        .HasMaxLength(30)
+                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(50)
                         .IsUnicode(false);
+
+                    b.Property<int>("PartyLeaderUserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Summary")
                         .HasColumnType("varchar(150)")
@@ -40,6 +43,8 @@ namespace SpotifyParty.Migrations
                         .IsUnicode(false);
 
                     b.HasKey("PartyId");
+
+                    b.HasIndex("PartyLeaderUserId");
 
                     b.ToTable("Party");
                 });
@@ -51,8 +56,15 @@ namespace SpotifyParty.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("PartyId")
+                    b.Property<string>("Country")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CurrentPartyId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("UserName")
                         .IsRequired()
@@ -62,16 +74,27 @@ namespace SpotifyParty.Migrations
 
                     b.HasKey("UserId");
 
-                    b.HasIndex("PartyId");
+                    b.HasAlternateKey("Email");
+
+                    b.HasIndex("CurrentPartyId");
 
                     b.ToTable("User");
+                });
+
+            modelBuilder.Entity("SpotifyParty.Party", b =>
+                {
+                    b.HasOne("SpotifyParty.User", "PartyLeader")
+                        .WithMany()
+                        .HasForeignKey("PartyLeaderUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("SpotifyParty.User", b =>
                 {
                     b.HasOne("SpotifyParty.Party", "CurrentParty")
                         .WithMany("Users")
-                        .HasForeignKey("PartyId");
+                        .HasForeignKey("CurrentPartyId");
                 });
 #pragma warning restore 612, 618
         }

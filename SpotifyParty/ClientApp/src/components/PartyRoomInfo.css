@@ -1,0 +1,11 @@
+﻿.PartyRoomInfo-container {
+    color: white;
+    border-radius: 4px;
+    padding: 16px;
+    margin: 8px 0;
+    text-align: center;
+    background-color: inherit;
+    overflow-y: auto;
+    display:flex;
+    flex-direction:column;
+}

@@ -1,105 +1,106 @@
 import React, { Component } from 'react';
-import { Route, generatePath } from 'react-router';
+import { Route, Switch } from 'react-router';
 import { Layout } from './components/Layout';
 import PartyList from './components/PartyList';
-import { CreateParty } from './components/CreateParty';
+import Landing from './components/Landing';
+import CreateParty from './components/CreateParty';
+import Loading from './components/Loading';
 import PartyRoom from './components/PartyRoom';
+import NotFoundView from './components/NotFoundView';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
-import spotifyClientInfo from './spotifyClientInformation.js'
+import { BrowserRouter } from 'react-router-dom';
+import { handleUserAuth } from './helper/SpotifyAuthHelper.js'
 
 import './custom.css'
 
 class App extends Component {
 
   constructor(props) {
-      super(props);
-      this.getAccessCode = this.getAccessCode.bind(this);
-      this.getAccessToken = this.getAccessToken.bind(this);
-      this.requestAccessToken = this.requestAccessToken.bind(this);
-      console.log(window.origin);
+    super(props);
+    this.isApi = this.isApi.bind(this);
+  }
+
+  componentWillMount() {
+    handleUserAuth(this);
+  }
+
+  isApi() {
+    return window.location.pathname.startsWith("/api");
+  }
+
+    loadHome() {
+        if (!this.props.isAuthLoaded) {
+            return <Loading />;
+        }
+        return (this.props.isLoggedIn) ? <PartyList /> : <Landing />;
     }
 
-    componentWillMount() {
-        let accessCode = this.getAccessCode();
-        if (!accessCode) {
-            return;
-        }
-        let accessToken = this.getAccessToken(accessCode);
-        if (!accessToken || accessToken.expires_in < 360) {
-            this.requestAccessToken(accessCode);
-        } else if (!this.props.accessToken) {
-            this.props.storeAccessToken(accessToken);
-        }
+    loadProfile() {
+        return (this.props.isAuthLoaded) ? <PartyList /> : <Loading />;
     }
 
-    async requestAccessToken(accessCode) {
-        const response = await fetch('https://accounts.spotify.com/api/token', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: `grant_type=authorization_code&code=${accessCode}&redirect_uri=${window.origin}&client_id=${spotifyClientInfo.client_id}&client_secret=${spotifyClientInfo.client_secret}`
-        });
-        const data = await response.json();
-        localStorage.setItem('accessToken', JSON.stringify(data));
-        this.props.storeAccessToken(data);
+    loadCreateParty() {
+        return (this.props.isAuthLoaded) ? <CreateParty /> : <Loading />;
     }
 
-    getAccessCode() {
-        if (this.props.spotifyCode) {
-            return this.props.spotifyCode;
-        }
-        let localCode = localStorage.getItem('spotifyCode');
-        if (localCode) {
-            this.props.loginUser(localCode);
-            return localCode;
-        }
-        let search = window.location.search;
-        let params = new URLSearchParams(search);
-        let code = params.get('code');
-        if (code) {
-            this.props.loginUser(code);
-            localStorage.setItem('spotifyCode', code);
-            return code;
-        }
-        return null;
-    }
-
-    getAccessToken() {
-        if (this.props.accessToken) {
-            return this.props.accessToken;
-        }
-        let localToken = localStorage.getItem('accessToken');
-        if (localToken) {
-            return JSON.parse(localToken);
-        }
-        return null;
+    loadPartyRoom() {
+        return (this.props.isAuthLoaded) ? <PartyRoom /> : <Loading />;
     }
 
   render () {
-    return (
-      <Layout>
-        <Route exact path='/' component={PartyList} />
-        <Route path="/create-party" component={CreateParty} />
-        <Route path="/party/:id" component={PartyRoom} />
-      </Layout>
+      if (this.isApi()) {
+          return <NotFoundView />;
+      }
+      return (
+        <BrowserRouter>
+          <Layout>
+            <Switch>
+              <Route exact path='/'>
+                {this.loadHome()}
+              </Route>
+              <Route path="/profile">
+                {this.loadProfile()}
+              </Route>
+              <Route path="/create-party">
+                {this.loadCreateParty()}
+              </Route>
+              <Route path="/party/:id">
+                {this.loadPartyRoom()}
+              </Route>
+              <Route path="*">
+                <NotFoundView />
+              </Route>
+            </Switch>
+          </Layout>
+        </BrowserRouter>
     );
   }
 }
 
 const mapStateToProps = state => ({
     spotifyCode: state.auth.spotifyCode,
-    accessToken: state.auth.accessToken
+    accessToken: state.auth.accessToken, 
+    isLoggedIn: state.auth.isLoggedIn, 
+    isAuthLoaded: state.auth.isAuthLoaded
 });
 
 const mapDispatchToProps = dispatch => ({
     loginUser: (code) => {
         return dispatch({ type: 'LOGIN_USER', spotifyCode: code });
     },
+    finishAuth: () => {
+        return dispatch({ type: 'AUTH_FINISHED'});
+    },
+    logoutUser: () => {
+        return dispatch({ type: 'LOGOUT_USER'});
+    },
     storeAccessToken: (token) => {
         return dispatch({ type: 'GET_ACCESS_TOKEN', accessToken: token });
+    }, 
+    verifyUserLogin: (user) => {
+        let userInfo = { userId: user.userId, userName: user.userName, email: user.email, country: user.country };
+        return dispatch({ type: 'VERIFY_LOGIN', isLoggedIn: true, user: userInfo });
     }
 });
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App));
+export default connect(mapStateToProps, mapDispatchToProps)(App);

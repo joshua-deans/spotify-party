@@ -1,0 +1,5 @@
+﻿.NotFoundView-message {
+    top: 50%;
+    position: relative;
+    transform: translateY(-100%);
+}

@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SpotifyParty
-{
+﻿namespace SpotifyParty {
     public partial class User
     {
         public string UserName { get; set; }
+        public string Email { get; set; }
         public int UserId { get; set; }
-        public int? PartyId { get; set; }
-        public Party? CurrentParty { get; set; }
+        public string Country { get; set; }
+        public int? CurrentPartyId { get; set; }
     }
 }

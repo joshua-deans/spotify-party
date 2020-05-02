@@ -1,33 +1,37 @@
-﻿using System;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
-namespace SpotifyParty.Controllers
-{
+namespace SpotifyParty.Controllers {
     [Route("api/[controller]")]
     [ApiController]
     public class PartyController : ControllerBase
     {
         // GET: api/Party
         [HttpGet]
-        public IEnumerable<Party> Get()
+        public IEnumerable<Party> GetParties()
         {
             var db = new SpotifyPartyDBContext();
-            return db.Party.ToList();
+            var parties = db.Party.AsNoTracking()
+                .Include(party => party.Users);
+            return parties;
         }
 
         // GET: api/Party/5
-        [HttpGet("{id}", Name = "Get")]
-        public ActionResult<Party> Get(uint id)
+        [HttpGet("{id}", Name = "GetParty")]
+        public ActionResult<Party> GetParty(uint id)
         {
             var db = new SpotifyPartyDBContext();
-            var party = db.Party.Single((p) => p.PartyId == id);
+            var party = db.Party
+                .Include(party => party.Users)
+                .Include(party => party.PartyLeader)
+                .Single((p) => p.PartyId == id);
+            Debug.WriteLine(party.Users.ToString());
             if (party == null) {
                 return NotFound();
             }
@@ -36,25 +40,42 @@ namespace SpotifyParty.Controllers
 
         // POST: api/Party
         [HttpPost]
-        public void Post([FromBody] JsonElement value)
+        public IActionResult PostParty([FromBody] JsonElement value)
         {
-            var partyName = value.GetProperty("name").GetString();
-            var partySummary = value.GetProperty("summary").GetString();
-            var db = new SpotifyPartyDBContext();
-            db.Party.Add(new Party { Name = partyName, Summary = partySummary });
-            db.SaveChanges();
+            try {
+                var partyName = value.GetProperty("name").GetString();
+                var partySummary = value.GetProperty("summary").GetString();
+                var userId = value.GetProperty("userId").GetInt32();
+                var db = new SpotifyPartyDBContext();
+                var user = db.User.Find(userId);
+                db.Party.Add(new Party { Name = partyName, Summary = partySummary, PartyLeader = user });
+                db.SaveChanges();
+                return StatusCode(200);
+            }
+            catch (Exception e) {
+                return StatusCode(500, e.ToString());
+            }
         }
 
         // PUT: api/Party/5
         [HttpPut("{id}")]
-        public void Put([FromBody] JsonElement value)
-        {
+        public void PutParty(uint id, [FromBody] JsonElement value) {
+            var db = new SpotifyPartyDBContext();
         }
 
-        // DELETE: api/ApiWithActions/5
+        // DELETE: api/Party/5
         [HttpDelete("{id}")]
-        public void Delete([FromBody] JsonElement value)
-        {
+        public IActionResult DeleteParty(int id) {
+            try {
+                var db = new SpotifyPartyDBContext();
+                var party = new Party { PartyId = id };
+                db.Remove(party);
+                db.SaveChanges();
+                return StatusCode(200);
+            }
+            catch (Exception e) {
+                return StatusCode(500, e.Message);
+            }
         }
     }
 }

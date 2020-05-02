@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SpotifyParty.Hubs;
 
 namespace SpotifyParty {
     public class Startup {
@@ -23,6 +24,7 @@ namespace SpotifyParty {
             services.AddSpaStaticFiles(configuration => {
                 configuration.RootPath = "ClientApp/build";
             });
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,12 +42,15 @@ namespace SpotifyParty {
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
+            app.UseWebSockets();
+
             app.UseRouting();
 
             app.UseEndpoints(endpoints => {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
+                endpoints.MapHub<PartyHub>("/partyhub");
             });
 
             app.UseSpa(spa => {
