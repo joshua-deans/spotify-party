@@ -1,0 +1,22 @@
+﻿.PartyRoomMessage-container {
+    float: left;
+    background-color: #343a40;
+    padding: 8px;
+    margin: 8px;
+    border-radius: 8px;
+    min-width: 45%;
+}
+
+.PartyRoomMessage-userName {
+    text-align: left;
+    font-weight: bold;
+}
+
+.PartyRoomMessage-dateTime {
+    text-align: right;
+    font-size: 12px;
+}
+
+.PartyRoomMessage-content {
+    text-align: left;
+}

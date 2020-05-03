@@ -14,23 +14,29 @@ class PartyRoom extends Component {
         this.fetchPartyInformation = this.fetchPartyInformation.bind(this);
         this.setUpHubConnection = this.setUpHubConnection.bind(this);
         this.handleTabClick = this.handleTabClick.bind(this);
-        this.state = { partyInfo: null, partyLeader: null, hubConnection: null, openTab: 'PartyInfo' };
+        this.setUpParty = this.setUpParty.bind(this);
+        this.state = { partyInfo: null, partyLeader: null, hubConnection: null, openTab: 'PartyInfo', partyMessages: [] };
     }
 
     componentWillMount() {
-        let hubConnection = new HubConnectionBuilder()
-            .withUrl("/partyhub")
-            .build();
-        this.setUpHubConnection(hubConnection);
-        this.setState({ hubConnection: hubConnection });
-        this.fetchPartyInformation();
+        this.setUpParty();
     };
 
     componentWillUnmount() {
         let id = this.props.match.params.id;
         this.state.hubConnection.invoke("RemoveUser", parseInt(this.props.user.userId), parseInt(id));
-    }
+    };
 
+    async setUpParty() {
+        let hubConnection = new HubConnectionBuilder()
+            .withUrl("/partyhub")
+            .build();
+        await this.fetchPartyInformation();
+        this.setUpHubConnection(hubConnection);
+        this.setState({ hubConnection: hubConnection });
+        this.fetchPartyMessages();
+    }
+    
     handleTabClick(event) {
         let partyInfoTab = document.querySelector('#PartyRoom-PartyInfoTab');
         let chatTab = document.querySelector('#PartyRoom-ChatTab');
@@ -82,6 +88,19 @@ class PartyRoom extends Component {
         this.setState({partyInfo: { partyId: result.partyId, partyName: result.name, partySummary: result.summary, partyLeader: result.partyLeader, users: result.users }});
     }
 
+    async fetchPartyMessages() {
+        let id = this.props.match.params.id;
+        const response = await fetch(`api/Message/party/${id}`);
+        const result = await response.json();
+        this.setState({ partyMessages: result });
+        this.state.hubConnection.on('ReceiveMessage', (result) => {
+            result = JSON.parse(result)
+            result.sender = JSON.parse(result.sender);
+            let currPartyMessages = this.state.partyMessages;
+            this.setState({ partyMessages: [...currPartyMessages, result] });
+        });
+    }
+
     render() {
         if (!this.props.isLoggedIn && this.props.isAuthLoaded) {
             return <Redirect to='/' />;
@@ -90,16 +109,16 @@ class PartyRoom extends Component {
             <div className="d-flex flex-column h-100">
                 <ul className="nav">
                     <li className="nav-item">
-                        <a id="PartyRoom-PartyInfoTab" className="PartyRoom-Tab nav-link text-white active h3" onClick={this.handleTabClick} href="#">Party Information</a>
+                        <a id="PartyRoom-PartyInfoTab" className="PartyRoom-Tab nav-link text-white active h4" onClick={this.handleTabClick} href="#">Party Information</a>
                     </li>
                     <li className="nav-item">
-                        <a id="PartyRoom-ChatTab" className="PartyRoom-Tab nav-link text-white h3" onClick={this.handleTabClick}  href="#">Chat</a>
+                        <a id="PartyRoom-ChatTab" className="PartyRoom-Tab nav-link text-white h4" onClick={this.handleTabClick}  href="#">Chat</a>
                     </li>
                 </ul>
                 {
                     (this.state.openTab === 'PartyInfo') ? 
                         <PartyRoomInfo partyInfo={this.state.partyInfo} user={this.props.user} /> :
-                        <PartyRoomChat />
+                        <PartyRoomChat partyInfo={this.state.partyInfo} user={this.props.user} messages={this.state.partyMessages} hubConnection={this.state.hubConnection} />
                 }
                 <SpotifyPlayerContainer user={this.props.user} spotifyCode={this.props.spotifyCode} accessToken={this.props.accessToken} partyInfo={this.state.partyInfo} hubConnection={this.state.hubConnection} />
                 

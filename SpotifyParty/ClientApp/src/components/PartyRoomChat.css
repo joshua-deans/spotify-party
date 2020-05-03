@@ -1,5 +1,17 @@
 ﻿.PartyRoomChat-container {
+    display: flex;
+    flex-direction: column;
     color: white;
     margin: 8px 0;
     text-align: center;
+    overflow-y: hidden;
+    flex-grow: 1;
+}
+
+.PartyRoomChat-chatBox {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: start;
 }

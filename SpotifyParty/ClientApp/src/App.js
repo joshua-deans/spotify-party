@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Route, Switch } from 'react-router';
+import { Route, Switch, withRouter } from 'react-router';
 import { Layout } from './components/Layout';
 import PartyList from './components/PartyList';
 import Landing from './components/Landing';
@@ -8,7 +8,6 @@ import Loading from './components/Loading';
 import PartyRoom from './components/PartyRoom';
 import NotFoundView from './components/NotFoundView';
 import { connect } from 'react-redux';
-import { BrowserRouter } from 'react-router-dom';
 import { handleUserAuth } from './helper/SpotifyAuthHelper.js'
 
 import './custom.css'
@@ -52,7 +51,6 @@ class App extends Component {
           return <NotFoundView />;
       }
       return (
-        <BrowserRouter>
           <Layout>
             <Switch>
               <Route exact path='/'>
@@ -72,7 +70,6 @@ class App extends Component {
               </Route>
             </Switch>
           </Layout>
-        </BrowserRouter>
     );
   }
 }
@@ -92,7 +89,9 @@ const mapDispatchToProps = dispatch => ({
         return dispatch({ type: 'AUTH_FINISHED'});
     },
     logoutUser: () => {
-        return dispatch({ type: 'LOGOUT_USER'});
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem('spotifyCode');
+        return dispatch({ type: 'LOGOUT_USER' });
     },
     storeAccessToken: (token) => {
         return dispatch({ type: 'GET_ACCESS_TOKEN', accessToken: token });
@@ -103,4 +102,4 @@ const mapDispatchToProps = dispatch => ({
     }
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App));

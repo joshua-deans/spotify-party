@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using SpotifyParty.Models;
 
 namespace SpotifyParty
 {
@@ -15,6 +16,7 @@ namespace SpotifyParty
 
         public virtual DbSet<Party> Party { get; set; }
         public virtual DbSet<User> User { get; set; }
+        public virtual DbSet<Message> Message { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -56,6 +58,23 @@ namespace SpotifyParty
                     .IsUnicode(false);
 
                 entity.HasAlternateKey(e => e.Email);
+            });
+
+            modelBuilder.Entity<Message>(entity => {
+
+                entity.HasOne(p => p.Sender)
+                    .WithMany()
+                    .HasForeignKey(e => e.SenderId)
+                    .IsRequired();
+
+                entity.Property(e => e.Content)
+                    .IsRequired()
+                    .IsUnicode(true);
+
+                entity.HasOne(p => p.Party)
+                    .WithMany()
+                    .HasForeignKey(e => e.PartyId)
+                    .IsRequired();
             });
         }
 

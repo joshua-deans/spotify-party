@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import './NavMenu.css';
 import { connect } from 'react-redux';
 import { SpotifyAuthUrl } from '../helper/SpotifyAuthHelper.js'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faHeadphonesAlt, faCamera } from '@fortawesome/free-solid-svg-icons'
 
 class NavMenu extends Component {
   constructor (props) {
@@ -79,7 +81,9 @@ class NavMenu extends Component {
       <header className="NavMenu">
         <Navbar className="navbar-expand-sm navbar-toggleable-sm navbar-dark box-shadow mb-3 NavMenu-navbar" light>
           <Container>
-            <NavbarBrand tag={Link} to="/">Spotify Party</NavbarBrand>
+            <NavbarBrand tag={Link} to="/">
+                <FontAwesomeIcon onClick={this.pauseSong} icon={faHeadphonesAlt} size="lg" />
+            </NavbarBrand>
             <NavbarToggler onClick={this.toggleNavbar} className="mr-2" />
             <Collapse className="d-sm-inline-flex flex-sm-row-reverse" isOpen={!this.state.collapsed} navbar>
               <ul className="navbar-nav flex-grow">

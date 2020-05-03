@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SpotifyParty;
 
 namespace SpotifyParty.Migrations
 {
     [DbContext(typeof(SpotifyPartyDBContext))]
-    partial class SpotifyPartyDBContextModelSnapshot : ModelSnapshot
+    [Migration("20200503022237_5-2-Migration-2")]
+    partial class _52Migration2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,9 +44,11 @@ namespace SpotifyParty.Migrations
 
                     b.HasKey("MessageId");
 
-                    b.HasIndex("PartyId");
+                    b.HasIndex("PartyId")
+                        .IsUnique();
 
-                    b.HasIndex("SenderId");
+                    b.HasIndex("SenderId")
+                        .IsUnique();
 
                     b.ToTable("Message");
                 });
@@ -113,14 +117,14 @@ namespace SpotifyParty.Migrations
             modelBuilder.Entity("SpotifyParty.Models.Message", b =>
                 {
                     b.HasOne("SpotifyParty.Party", "Party")
-                        .WithMany()
-                        .HasForeignKey("PartyId")
+                        .WithOne()
+                        .HasForeignKey("SpotifyParty.Models.Message", "PartyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("SpotifyParty.User", "Sender")
-                        .WithMany()
-                        .HasForeignKey("SenderId")
+                        .WithOne()
+                        .HasForeignKey("SpotifyParty.Models.Message", "SenderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

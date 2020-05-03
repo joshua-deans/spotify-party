@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using SpotifyParty.Models;
+using System;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -27,6 +29,32 @@ namespace SpotifyParty.Hubs {
 
         public async Task SendSongState(int partyId, JsonElement value) {
             await Clients.Group(partyId.ToString()).SendAsync("UpdateSongState", value);
+        }
+
+        public async Task SendMessage(int partyId, int userId, string content) {
+            if (content.Length == 0) {
+                return;
+            }
+            var db = new SpotifyPartyDBContext();
+            var user = db.User.Find(userId);
+            var party = db.Party.Find(partyId);
+            var message = new Message() { Content = content, Party = party, Sender = user, DateTime = DateTime.Now };
+            db.Message.Add(message);
+            db.SaveChanges();
+            var sender = JsonSerializer.Serialize(new {
+                country = message.Sender.Country,
+                currentPartyId = message.Sender.CurrentPartyId,
+                email = message.Sender.Email,
+                userId = message.Sender.UserId,
+                userName = message.Sender.UserName
+            });
+
+            await Clients.Group(partyId.ToString()).SendAsync("ReceiveMessage", JsonSerializer.Serialize(new { 
+                messageId = message.MessageId,
+                content = message.Content,
+                sender, 
+                dateTime = message.DateTime
+            }));
         }
     }
 }
