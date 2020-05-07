@@ -23,8 +23,9 @@ class PartyRoom extends Component {
     };
 
     componentWillUnmount() {
-        let id = this.props.match.params.id;
-        this.state.hubConnection.invoke("RemoveUser", parseInt(this.props.user.userId), parseInt(id));
+        if (this.state.hubConnection) {
+            this.state.hubConnection.stop();
+        }
     };
 
     async setUpParty() {
@@ -107,12 +108,12 @@ class PartyRoom extends Component {
         } 
         return (
             <div className="d-flex flex-column h-100">
-                <ul className="nav">
+                <ul className="nav nav-justified">
                     <li className="nav-item">
-                        <a id="PartyRoom-PartyInfoTab" className="PartyRoom-Tab nav-link text-white active h4" onClick={this.handleTabClick} href="#">Party Information</a>
+                        <a id="PartyRoom-PartyInfoTab" className="PartyRoom-Tab nav-link active btn btn-lg btn-info" onClick={this.handleTabClick} href="#">Party Info</a>
                     </li>
                     <li className="nav-item">
-                        <a id="PartyRoom-ChatTab" className="PartyRoom-Tab nav-link text-white h4" onClick={this.handleTabClick}  href="#">Chat</a>
+                        <a id="PartyRoom-ChatTab" className="PartyRoom-Tab nav-link btn btn-lg btn-info" onClick={this.handleTabClick} href="#">Party Chat</a>
                     </li>
                 </ul>
                 {

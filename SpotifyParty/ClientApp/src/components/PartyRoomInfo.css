@@ -8,3 +8,9 @@
     display:flex;
     flex-direction:column;
 }
+
+.PartyRoomInfo-listGroupItem {
+    background-color: #343a40;
+    border: 1px solid rgba(175, 175, 175, .125);
+    padding: 10px 12px;
+}

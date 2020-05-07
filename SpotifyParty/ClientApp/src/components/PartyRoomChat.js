@@ -24,6 +24,7 @@ class PartyRoomChat extends Component {
 
     render() {
         let messageCopy = [...this.props.messages];
+        let disabledStatus = (!this.state.messageContent) ? "disabled" : "";
         return (
             <form onClick={this.handleSubmit} className="PartyRoomChat-container">
                 <div className="PartyRoomChat-chatBox">
@@ -34,7 +35,7 @@ class PartyRoomChat extends Component {
                 <div className="input-group mb-3">
                     <input type="text" className="form-control" placeholder="Enter a message." value={this.state.messageContent} onChange={this.handleChange} required />
                     <div className="input-group-append">
-                        <button className="btn btn-info" type="submit">Submit</button>
+                        <button className={"btn btn-info " + disabledStatus} type="submit">Submit</button>
                     </div>
                 </div>
             </form>

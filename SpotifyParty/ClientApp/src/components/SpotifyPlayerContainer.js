@@ -52,63 +52,74 @@ class SpotifyPlayerContainer extends Component {
         // Ready
         player.addListener('ready', ({ device_id }) => {
             console.log('Ready with Device ID', device_id);
+            this.props.hubConnection.on('UpdateSongState', this.updateSongState);
+            this.playSong("spotify:track:10igKaIKsSB6ZnWxPxPvKO");
             setInterval(() => {
                 player.getCurrentState().then(state => {
                     if (!state) {
                         return;
                     }
-                    this.setState({ playerState: state });
-                    this.props.hubConnection.invoke('SendSongState', parseInt(this.props.partyInfo.partyId), state);
+                    if (this.isCurrentUserLeader()) {
+                        this.props.hubConnection.invoke('SendSongState', parseInt(this.props.partyInfo.partyId), state);
+                        this.setState({ playerState: state });
+                    }
                 });
             }, 750);
         });
-
-        await player.setVolume(0.5);
 
         // Not Ready
         player.addListener('not_ready', ({ device_id }) => {
             console.log('Device ID has gone offline', device_id);
         });
+        await player.setVolume(0.5);
         this.setState({ player: player });
-
-        this.props.hubConnection.on('UpdateSongState', this.updateSongState);
 
         player.connect();
     }
 
     async updateSongState(leaderState) {
+        console.log(leaderState);
+        console.log(leaderState.track_window.current_track.uri);
         if (this.isCurrentUserLeader()) {
             return;
         }
         let paused = leaderState.paused;
         let position = leaderState.position;
-        let contextUri = leaderState.context.uri;
-        if (contextUri !== this.state.player.context.uri) {
-            await this.playSong(contextUri);
+        let currentUri = leaderState.track_window.current_track.uri;
+        let state = { ...leaderState };
+        if (!this.state.playerState || currentUri !== this.state.playerState.context.uri) {
+            await this.playSong(currentUri);
         }
-        if (Math.abs(position - this.state.player.position) >= 5000) {
-            await this.state.player.seek(this.state.player.position);
-        }
+        if (!this.state.playerState || Math.abs(position - this.state.player.position) >= 1000) {
+            await this.state.player.seek(position);
+        } 
         if (paused !== this.state.player.paused) {
-            if (this.state.player.paused) {
+            if (paused) {
                 await this.state.player.pause()
             } else {
                 await this.state.player.resume();
             }
         }
+        state = { ...state, position: this.state.playerState.position };
+        this.setState({ playerState: state });
     };
 
     async playSong(uri) {
+        console.log("PLAY SONG RAN");
         let id = this.state.player._options.id;
         const token = this.props.accessToken;
-        fetch(`https://api.spotify.com/v1/me/player/play?device_id=${id}`, {
+        console.log(id);
+        console.log('https://api.spotify.com/v1/me/player/play?device_id=' + id);
+        await fetch('https://api.spotify.com/v1/me/player/play?device_id=' + id, {
             method: 'PUT',
-            body: JSON.stringify({ uris: [uri] }),
+            body: JSON.stringify({ "uris": [uri] }),
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token.access_token}`
             },
-        });
+        }).then(r => { console.log(r); return r.json() })
+            .then(r => console.log(r))
+            .catch(e => console.log(e));
     }
 
     onLoad() {
@@ -148,6 +159,8 @@ class SpotifyPlayerContainer extends Component {
         let bottom = targetRect.bottom;
         let top = targetRect.top;
         let volume = (clientY - bottom) / (top - bottom);
+        volume *= 20;
+        volume = Math.floor(volume) / 20;
         this.state.player.setVolume(volume).then(() => {
             this.setState({ volume: volume * 100 });
         });

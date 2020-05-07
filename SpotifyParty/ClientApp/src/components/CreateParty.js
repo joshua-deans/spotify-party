@@ -46,19 +46,21 @@ class CreateParty extends Component {
         } 
         return (
             <div className="CreateParty-container">
-                <h3 className="text-center">Create A Party</h3>
-            <div className="card CreateParty-card">
-                <Form onSubmit={this.handleSubmit}>
-                    <FormGroup>
-                        <Label for="name">Party Name</Label>
-                        <input className="form-control" type="text" name="name" id="name" value={this.state.name} onChange={this.handleChange} required />
-                    </FormGroup>
-                    <FormGroup>
-                        <Label for="summary">Party Summary</Label>
-                        <input className="form-control" type="textarea" name="summary" id="summary" value={this.state.summary} onChange={this.handleChange} />
-                    </FormGroup>
-                   <Button color="primary">Submit</Button>
-                </Form>
+                <h3 className="text-center mb-4">Create A Party</h3>
+                <div className="card CreateParty-card">
+                    <Form onSubmit={this.handleSubmit}>
+                        <FormGroup>
+                            <Label for="name">Party Name</Label>
+                            <input className="form-control" type="text" name="name" id="name" value={this.state.name} onChange={this.handleChange} required />
+                        </FormGroup>
+                        <FormGroup>
+                            <Label for="summary">Party Summary</Label>
+                            <input className="form-control" type="textarea" name="summary" id="summary" value={this.state.summary} onChange={this.handleChange} />
+                        </FormGroup>
+                        <div className="text-center pt-2">
+                            <Button color="primary">Create Party</Button>
+                        </div>
+                    </Form>
                 </div>
             </div>
         );

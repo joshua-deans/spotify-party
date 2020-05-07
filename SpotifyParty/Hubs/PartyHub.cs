@@ -12,6 +12,8 @@ namespace SpotifyParty.Hubs {
             var party = db.Party.Find(partyId);
             party.Users.Add(user);
             db.SaveChanges();
+            Context.Items.Add("userId", userId);
+            Context.Items.Add("partyId", partyId);
             await Groups.AddToGroupAsync(Context.ConnectionId, partyId.ToString());
             
             await Clients.Group(partyId.ToString()).SendAsync("UserAdded", JsonSerializer.Serialize(user));
@@ -23,6 +25,8 @@ namespace SpotifyParty.Hubs {
             var party = db.Party.Find(partyId);
             party.Users.Remove(user);
             db.SaveChanges();
+            Context.Items.Remove("userId");
+            Context.Items.Remove("partyId");
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, partyId.ToString());
             await Clients.Group(partyId.ToString()).SendAsync("UserLeft", JsonSerializer.Serialize(user));
         }
@@ -38,7 +42,7 @@ namespace SpotifyParty.Hubs {
             var db = new SpotifyPartyDBContext();
             var user = db.User.Find(userId);
             var party = db.Party.Find(partyId);
-            var message = new Message() { Content = content, Party = party, Sender = user, DateTime = DateTime.Now };
+            var message = new Message() { Content = content, Party = party, Sender = user, DateTime = DateTime.UtcNow };
             db.Message.Add(message);
             db.SaveChanges();
             var sender = JsonSerializer.Serialize(new {
@@ -55,6 +59,21 @@ namespace SpotifyParty.Hubs {
                 sender, 
                 dateTime = message.DateTime
             }));
+        }
+
+        public override async Task OnDisconnectedAsync(Exception exception) {
+            var partyId = Int32.Parse(Context.Items["partyId"].ToString());
+            var userId = Int32.Parse(Context.Items["userId"].ToString());
+            var db = new SpotifyPartyDBContext();
+            var user = db.User.Find(userId);
+            var party = db.Party.Find(partyId);
+            party.Users.Remove(user);
+            db.SaveChanges();
+            Context.Items.Remove("userId");
+            Context.Items.Remove("partyId");
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, partyId.ToString());
+            await Clients.Group(partyId.ToString()).SendAsync("UserLeft", JsonSerializer.Serialize(user));
+            await base.OnDisconnectedAsync(exception);
         }
     }
 }

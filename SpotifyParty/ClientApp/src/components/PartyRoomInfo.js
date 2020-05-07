@@ -29,18 +29,22 @@ class PartyRoomInfo extends Component {
         return (
             <div className="PartyRoomInfo-container text-left flex-grow-1 align-items-center">
                 <div className="row w-100">
-                    <div className="col-sm-6 text-center mb-4">
-                        <div><span className="h6">Party Name:</span> {this.props.partyInfo.partyName}</div>
-                        <div><span className="h6">Party Summary:</span> {this.props.partyInfo.partySummary}</div>
-                        {this.props.partyInfo.partyLeader &&
-                            <div><span className="h6">Party Leader:</span> {this.props.partyInfo.partyLeader.userName}</div>
-                        }
+                    <div className="col-sm-6 text-center my-3">
+                        <div className="list-group">
+                            <div className="list-group-item PartyRoomInfo-listGroupItem"><span>Party Name:</span> {this.props.partyInfo.partyName}</div>
+                            <div className="list-group-item PartyRoomInfo-listGroupItem"><span>Party Summary:</span> {this.props.partyInfo.partySummary}</div>
+                            {this.props.partyInfo.partyLeader &&
+                                <div className="list-group-item PartyRoomInfo-listGroupItem"><span>Party Leader:</span> {this.props.partyInfo.partyLeader.userName}</div>
+                            }
+                        </div>
                     </div>
-                    <div className="col-sm-6 text-center">
-                        <div className="h6 mb-0">Online Users ({this.props.partyInfo.users.length})</div>
-                        {this.props.partyInfo.users.map(user => {
-                            return <div key={user.userId}>{user.userName}</div>
-                        })}
+                    <div className="col-sm-6 text-center my-3">
+                        <div className="list-group">
+                            <div className="mb-0 list-group-item PartyRoomInfo-listGroupItem h6">Online Users <span className="badge badge-info ml-1">{this.props.partyInfo.users.length}</span></div>
+                            {this.props.partyInfo.users.map(user => {
+                                return <div className="list-group-item PartyRoomInfo-listGroupItem" key={user.userId}>{user.userName}</div>
+                            })}
+                        </div>
                     </div>
                  </div>
                 {

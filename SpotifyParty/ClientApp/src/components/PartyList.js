@@ -14,7 +14,7 @@ class PartyList extends Component {
   }
 
   isLoggedIn() {
-      return this.props.accessToken != null && this.props.spotifyCode != null;
+      return this.props.isLoggedIn;
   }
 
   renderPartiesTable(parties) {
@@ -46,14 +46,16 @@ class PartyList extends Component {
 
   render() {
     let contents = (this.state.loading)
-      ? <p><em>Loading...</em></p>
+        ? <div className="spinner-border text-light" role="status">
+            <span className="sr-only">Loading...</span>
+          </div>
       : this.renderPartiesTable(this.state.parties);
 
       let title = (!this.state.loading && this.state.parties.length === 0)
           ? "No Parties Available" : "Join A Party"
       title = (this.state.loading) ? "" : title;
     return (
-      <div className="PartyList-container">
+      <div className="PartyList-container text-center">
             <h3 className="text-center" id="tableLabel">{title}</h3>
         {contents}
       </div>

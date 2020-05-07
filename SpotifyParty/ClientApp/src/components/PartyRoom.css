@@ -1,7 +1,6 @@
 ﻿.PartyRoomChat {
     border: 1px solid black;
     border-radius: 4px;
-
     padding: 16px;
 }
 
@@ -9,6 +8,6 @@
     outline: none;
 }
 
-.PartyRoom-Tab.active {
-    font-weight:bold;
+.PartyRoom-Tab {
+    margin: 0 16px;
 }

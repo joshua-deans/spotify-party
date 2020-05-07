@@ -22,7 +22,7 @@ namespace SpotifyParty
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer(SQLConnectionInfo.getConnectionString());
+                optionsBuilder.UseSqlServer(SQLConnectionInfo.getConnectionString(), options => options.EnableRetryOnFailure());
             }
         }
 
@@ -32,13 +32,14 @@ namespace SpotifyParty
             {
                 entity.HasMany(p => p.Users)
                     .WithOne()
-                    .HasForeignKey(e => e.CurrentPartyId);
+                    .HasForeignKey(e => e.CurrentPartyId)
+                    .OnDelete(DeleteBehavior.SetNull);
 
 
                 entity.HasOne(e => e.PartyLeader)
                     .WithOne()
                     .HasForeignKey<Party>(e => e.PartyLeaderUserId)
-                    .OnDelete(DeleteBehavior.NoAction);
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 entity.Property(e => e.Name)
                     .IsRequired()
@@ -64,8 +65,7 @@ namespace SpotifyParty
 
                 entity.HasOne(p => p.Sender)
                     .WithMany()
-                    .HasForeignKey(e => e.SenderId)
-                    .IsRequired();
+                    .HasForeignKey(e => e.SenderId);
 
                 entity.Property(e => e.Content)
                     .IsRequired()
@@ -75,6 +75,7 @@ namespace SpotifyParty
                     .WithMany()
                     .HasForeignKey(e => e.PartyId)
                     .IsRequired();
+                    //.OnDelete(DeleteBehavior.Cascade);
             });
         }
 
